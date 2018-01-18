@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, NoMonomorphismRestriction #-}
+{-# LANGUAGE FlexibleInstances #-}
 -- | This module provides an interpretator for the LOOP programming language.
 module Loop where
 
@@ -45,32 +45,30 @@ type P   = Env -> [Env]
 skip :: P
 skip env = [env]
 
--- loop X P == P^X
-loop :: Var -> P -> P
-loop v p env = iterate (concatMap p) [env] !! fetch  v env
+assign :: IsExp e1 => Var -> e1 -> P
+assign v e env = [update v (toExp e env) env]
 
 sequ :: P -> P -> P
 sequ p1 p2 env = p1 env >>= p2
 
-num :: Val -> Exp
-num i _ = i
-
-assign :: IsExp e1 => Var -> e1 -> P
-assign v e env = [update v (toExp e env) env]
+-- loop X P == P^X
+loop :: Var -> P -> P
+loop v p env = iterate (concatMap p) [env] !! fetch  v env
 
 
 -- * Non-deterministic Statements
 
--- nloop X P == [skip, P^1,...,P^X]
-nloop :: Var -> P -> P
-nloop v p env = concat $ take (fetch v env + 1) $ iterate (concatMap p) [env]
+choose :: P -> P -> P
+choose p1 p2 env = p1 env ++ p2 env
 
 -- nasign X E == X \in [0..E]
 nassign :: IsExp e1 => Var -> e1 -> P
 nassign v e env = [ update v i env | i <- [0..toExp e env] ]
 
-choose :: P -> P -> P
-choose p1 p2 env = p1 env ++ p2 env
+-- nloop X P == [skip, P^1,...,P^X]
+nloop :: Var -> P -> P
+nloop v p env = concat $ take (fetch v env + 1) $ iterate (concatMap p) [env]
+
 
 
 -- * Evaluator
