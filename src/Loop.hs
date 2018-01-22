@@ -13,7 +13,7 @@ type Var = String
 type Val = Int
 type Env = M.Map Var Val
 
-fetch :: Var -> Env -> Int
+fetch :: Var -> Env -> Val
 fetch v env = error err `fromMaybe` M.lookup v env
   where err = "error: lookup: not found: " ++ v
 
@@ -26,7 +26,7 @@ update = M.insert
 type Exp = Env -> Val
 
 class IsExp e      where toExp :: e -> Exp
-instance IsExp Int where toExp = const
+instance IsExp Val where toExp = const
 instance IsExp Var where toExp = fetch
 instance IsExp Exp where toExp = id
 
