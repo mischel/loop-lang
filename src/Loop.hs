@@ -3,22 +3,17 @@
 module Loop where
 
 
-import qualified Data.Map.Strict as M
-import           Data.Maybe      (fromMaybe)
-
-
 -- * Environment
 
 type Var = String
 type Val = Int
-type Env = M.Map Var Val
+type Env = Var -> Val
 
 fetch :: Var -> Env -> Val
-fetch v env = error err `fromMaybe` M.lookup v env
-  where err = "error: lookup: not found: " ++ v
+fetch v env = env v
 
 update :: Var -> Val -> Env -> Env
-update = M.insert
+update v i env v' = if v' == v then i else env v'
 
 
 -- * Expressions
@@ -70,11 +65,10 @@ nloop :: Var -> P -> P
 nloop v p env = concat $ take (fetch v env + 1) $ iterate (concatMap p) [env]
 
 
-
 -- * Evaluator
 
 eval :: P -> [(Var,Val)] -> [Env]
-eval p = p . M.fromList
+eval p = p . foldr (uncurry update) (\v -> error $ "not defined" ++ v )
 
 
 -- * Syntactic Sugar
@@ -102,9 +96,6 @@ infix 4 <|>
 
 ppl :: [(Var, Val)] -> String
 ppl = foldr k "" where k (v,i) acc = v ++ " = " ++ show i ++ "\t" ++ acc
-
-pp :: Env -> String
-pp = ppl . M.toList
 
 pretty :: [Var] -> [Env] -> String
 pretty vs = unlines . map k where k env = "  " ++ ppl [ (v,i) | v <- vs, let i = fetch v env ]

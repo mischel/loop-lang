@@ -1,5 +1,5 @@
 name:                loop-lang
-version:             1.0.0.0
+version:             0.0.0.0
 synopsis:            The LOOP programming langague
 description:         This package provides an interpreter for a simple Loop language with support for non-determinism.
 homepage:            https://github.com/mischel/loop-lang#readme
@@ -16,7 +16,7 @@ extra-source-files:  README.md
 library
   hs-source-dirs:      src
   exposed-modules:     Loop
-  build-depends:       base >= 4.7 && < 5, containers
+  build-depends:       base >= 4.7 && < 5
   default-language:    Haskell2010
   ghc-options:         -Wall
   other-extensions:    FlexibleInstances
